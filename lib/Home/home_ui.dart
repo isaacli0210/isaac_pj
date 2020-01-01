@@ -1,87 +1,101 @@
 import 'package:flutter/material.dart';
-import 'package:isaac_pj/Search/search_func.dart';
-import 'change_venue_button.dart';
+import 'package:flutter/rendering.dart';
+import 'package:isaac_pj/Admin/admin_ui.dart';
+import 'package:isaac_pj/MoveIn/move_in_ui.dart';
+import 'package:isaac_pj/MoveOut/move_out_ui.dart';
+import 'package:isaac_pj/Preview/preview_ui.dart';
 
 class Home extends StatefulWidget {
   @override
   _HomeState createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
-  final items = List<String>.generate(30, (i) => "Item $i");
+class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
 
-  Widget appBar(BuildContext context) {
-    return AppBar(
-      title: Text('Phase 1'),
-      centerTitle: true,
-      
-      actions: <Widget>[
-        ChangeVenueButton(),
-        IconButton(
-          icon: Icon(Icons.search),
-          tooltip: 'Search',
-          onPressed: () {
-            showSearch(context: context, delegate: SearchFunc());
-          },
-        )
-      ],
-      backgroundColor: Colors.blue,
-      elevation: 0,
-    );
+  int _currentIndex = 0;
+  List<Widget> pages = List<Widget>();
+  final _bottomNavigationColor = Colors.blue;
+  AnimationController _hide;
+
+  @override
+  void initState() {
+    pages
+      ..add(Admin())
+      ..add(MoveIn())
+      ..add(MoveOut())
+      ..add(Preview());
+    super.initState();
+    _hide = AnimationController(vsync: this, duration: kThemeAnimationDuration);
   }
 
-  Widget passList() {
-    return ListView.builder(
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        return ListTile(
-          title: Text('${items[index]}'),
-        );
+  @override
+  void dispose() {
+    _hide.dispose();
+    super.dispose();
+  }
+
+  bool _handleScrollNotification(ScrollNotification scrollNotification) {
+    if (scrollNotification.depth == 0) {
+      if (scrollNotification is UserScrollNotification) {
+        final UserScrollNotification userScroll = scrollNotification;
+
+        switch (userScroll.direction) {
+          case ScrollDirection.forward:
+            _hide.forward();
+            break;
+          case ScrollDirection.reverse:
+            _hide.reverse();
+            break;
+          case ScrollDirection.idle:
+            break;
+        }
+      }
+    }
+    return false;
+  }
+
+  Widget bottomNavigationBar() {
+    return BottomNavigationBar(
+      items: [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home, color: _bottomNavigationColor,),
+          title: Text('Home', style: TextStyle(color: _bottomNavigationColor),)
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.file_download, color: _bottomNavigationColor,),
+          title: Text('MoveIn', style: TextStyle(color: _bottomNavigationColor))
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.file_upload, color: _bottomNavigationColor),
+          title: Text('MoveOut', style: TextStyle(color: _bottomNavigationColor))
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.edit, color: _bottomNavigationColor),
+          title: Text('Preview', style: TextStyle(color: _bottomNavigationColor))
+        ),
+      ],
+      currentIndex: _currentIndex,
+      onTap: (int index) {
+        setState(() {
+          _currentIndex = index;
+        });
       },
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: appBar(context),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.blue,
-              ),
-              child: Center(
-                child: SizedBox(
-                  width: 60.0,
-                  height: 60.0,
-                  child: CircleAvatar(
-                    child: Text('eVP'),
-                  ),
-                ),
-              ),
-            ),
-            ListTile(
-              title: Text('進場', style: TextStyle(fontWeight: FontWeight.bold),),
-              onTap: () {
-                // Update the state of the app.
-                // ...
-              },
-            ),
-            ListTile(
-              title: Text('Item 2'),
-              onTap: () {
-                // Update the state of the app.
-                // ...
-              },
-            ),
-          ],
+    //final Orientation orientation = MediaQuery.of(context).orientation;
+
+    return NotificationListener<ScrollNotification>(
+      onNotification: _handleScrollNotification,
+      child: Scaffold(
+        body: pages[_currentIndex],
+        bottomNavigationBar: SizeTransition(
+          sizeFactor: _hide,
+          axisAlignment: -1.0,
+          child: bottomNavigationBar(),
         ),
-      ),
-      body: Column(
-        children: <Widget>[Expanded(child: passList())],
       ),
     );
   }

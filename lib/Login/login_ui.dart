@@ -100,41 +100,13 @@ class _LoginState extends State<Login> {
             FlatButton(
               child: Text('Login'),
               onPressed: () {
-                final route = MaterialPageRoute(builder: (BuildContext context) => Home());
-                Navigator.push(context, route);
+                final route = MaterialPageRoute(builder: (context) => Home());
+                Navigator.pushReplacement(context, route); // Restrict back to login page
               },
             )
-
           ],
         ),
       ),
     );
   }
 }
-
-
-
-  // Widget loginButton(BuildContext context) {
-  //   return InkWell(
-  //     onTap: () {
-  //       _isPressed
-  //       ? loginButtonOnPressed(false)
-  //       : loginButtonOnPressed(true);
-  //     },
-  //     child: AnimatedContainer(
-        
-  //       child: buttonWidth == 0.1 
-  //         ? CircularProgressIndicator(strokeWidth: 2.0, valueColor: AlwaysStoppedAnimation<Color>(Colors.white),) 
-  //         : Text(buttonText),
-  //       alignment: FractionalOffset.center,
-  //       duration: Duration(milliseconds: 500),
-  //       curve: Curves.linearToEaseOut,
-  //       width: MediaQuery.of(context).size.width * buttonWidth,
-  //       height: MediaQuery.of(context).size.height * buttonHeight,
-  //       decoration: BoxDecoration(
-  //         color: Colors.amber,
-  //         borderRadius: BorderRadius.circular(100.0)
-  //       ),
-  //     ),
-  //   );
-  // }
